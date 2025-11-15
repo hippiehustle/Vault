@@ -9,7 +9,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.skyview.weather.core.security.BiometricManager
+import com.skyview.weather.presentation.onboarding.OnboardingScreen
+import com.skyview.weather.presentation.settings.SettingsScreen
 import com.skyview.weather.presentation.vault.VaultBrowserScreen
+import com.skyview.weather.presentation.vault.VaultItemDetailScreen
 import com.skyview.weather.presentation.vault.VaultUnlockScreen
 import com.skyview.weather.presentation.vault.VaultViewModel
 import com.skyview.weather.presentation.weather.WeatherHomeScreen
@@ -19,6 +22,7 @@ import com.skyview.weather.presentation.weather.WeatherViewModel
  * Navigation routes.
  */
 sealed class Screen(val route: String) {
+    object Onboarding : Screen("onboarding")
     object Weather : Screen("weather")
     object VaultUnlock : Screen("vault_unlock")
     object VaultBrowser : Screen("vault_browser")
@@ -35,12 +39,26 @@ sealed class Screen(val route: String) {
 fun SkyViewNavigation(
     navController: NavHostController = rememberNavController(),
     biometricManager: BiometricManager,
-    activity: ComponentActivity?
+    activity: ComponentActivity?,
+    startDestination: String = Screen.Weather.route
 ) {
     NavHost(
         navController = navController,
-        startDestination = Screen.Weather.route
+        startDestination = startDestination
     ) {
+        // Onboarding screen
+        composable(Screen.Onboarding.route) {
+            OnboardingScreen(
+                onComplete = {
+                    navController.navigate(Screen.Weather.route) {
+                        popUpTo(Screen.Onboarding.route) { inclusive = true }
+                    }
+                },
+                biometricManager = biometricManager,
+                activity = activity
+            )
+        }
+
         // Weather home screen
         composable(Screen.Weather.route) {
             val weatherViewModel: WeatherViewModel = hiltViewModel()
@@ -84,15 +102,26 @@ fun SkyViewNavigation(
             )
         }
 
-        // Vault item detail screen (placeholder)
+        // Vault item detail screen
         composable(Screen.VaultItem.route) { backStackEntry ->
             val itemId = backStackEntry.arguments?.getString("itemId")
-            // TODO: Implement item detail screen
+            if (itemId != null) {
+                VaultItemDetailScreen(
+                    itemId = itemId,
+                    onNavigateBack = {
+                        navController.popBackStack()
+                    }
+                )
+            }
         }
 
-        // Settings screen (placeholder)
+        // Settings screen
         composable(Screen.Settings.route) {
-            // TODO: Implement settings screen
+            SettingsScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
         }
     }
 }

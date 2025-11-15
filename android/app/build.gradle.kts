@@ -114,9 +114,11 @@ dependencies {
     // Navigation
     implementation("androidx.navigation:navigation-compose:2.7.5")
 
-    // Accompanist (Permissions, SystemUIController)
+    // Accompanist (Permissions, SystemUIController, Pager)
     implementation("com.google.accompanist:accompanist-permissions:0.32.0")
     implementation("com.google.accompanist:accompanist-systemuicontroller:0.32.0")
+    implementation("com.google.accompanist:accompanist-pager:0.32.0")
+    implementation("com.google.accompanist:accompanist-pager-indicators:0.32.0")
 
     // Hilt (Dependency Injection)
     implementation("com.google.dagger:hilt-android:2.48")
