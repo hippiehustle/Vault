@@ -7,6 +7,7 @@ import com.skyview.weather.data.model.*
 import com.skyview.weather.domain.model.*
 import com.skyview.weather.util.VaultItemType
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.util.UUID
 import javax.inject.Inject
@@ -310,6 +311,10 @@ class VaultRepository @Inject constructor(
      */
     suspend fun getVaultStats(): Result<VaultStats> {
         return try {
+            // Calculate total size from encrypted content
+            val allItems = vaultItemDao.getAllVaultItems().first()
+            val totalSize = allItems.sumOf { it.encrypted_content.size.toLong() }
+
             val stats = VaultStats(
                 totalItems = vaultItemDao.getTotalItemCount(),
                 photoCount = vaultItemDao.getItemCountByType(VaultItemType.PHOTO.name),
@@ -319,7 +324,7 @@ class VaultRepository @Inject constructor(
                 passwordCount = vaultItemDao.getItemCountByType(VaultItemType.PASSWORD.name),
                 audioCount = vaultItemDao.getItemCountByType(VaultItemType.AUDIO.name),
                 contactCount = vaultItemDao.getItemCountByType(VaultItemType.CONTACT.name),
-                totalSize = 0L // TODO: Calculate from file paths
+                totalSize = totalSize
             )
             Result.success(stats)
         } catch (e: Exception) {
@@ -332,7 +337,19 @@ class VaultRepository @Inject constructor(
      */
     fun getAllFolders(): Flow<List<VaultFolder>> {
         return vaultFolderDao.getAllFolders().map { entities ->
-            entities.map { it.toVaultFolder() }
+            entities.map { entity ->
+                // Get item count for each folder
+                val itemCount = vaultItemDao.getItemsInFolder(entity.id).first().size
+                VaultFolder(
+                    id = entity.id,
+                    name = entity.name,
+                    parentId = entity.parent_id,
+                    createdAt = entity.created_at,
+                    color = entity.color,
+                    orderIndex = entity.order_index,
+                    itemCount = itemCount
+                )
+            }
         }
     }
 
@@ -351,7 +368,19 @@ class VaultRepository @Inject constructor(
             )
 
             vaultFolderDao.insertFolder(entity)
-            Result.success(entity.toVaultFolder())
+
+            // Convert to domain model with item count
+            val folder = VaultFolder(
+                id = entity.id,
+                name = entity.name,
+                parentId = entity.parent_id,
+                createdAt = entity.created_at,
+                color = entity.color,
+                orderIndex = entity.order_index,
+                itemCount = 0 // New folder has no items
+            )
+
+            Result.success(folder)
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -424,7 +453,10 @@ class VaultRepository @Inject constructor(
     /**
      * Converts entity to domain model.
      */
-    private fun VaultFolderEntity.toVaultFolder(): VaultFolder {
+    private suspend fun VaultFolderEntity.toVaultFolder(): VaultFolder {
+        // Get actual item count for this folder
+        val itemCount = vaultItemDao.getItemsInFolder(id).first().size
+
         return VaultFolder(
             id = id,
             name = name,
@@ -432,7 +464,7 @@ class VaultRepository @Inject constructor(
             createdAt = created_at,
             color = color,
             orderIndex = order_index,
-            itemCount = 0 // TODO: Query actual count
+            itemCount = itemCount
         )
     }
 }
