@@ -9,6 +9,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.skyview.weather.core.security.BiometricManager
 import com.skyview.weather.presentation.onboarding.OnboardingScreen
+import com.skyview.weather.presentation.settings.LicensesScreen
+import com.skyview.weather.presentation.settings.PrivacyPolicyScreen
 import com.skyview.weather.presentation.settings.SettingsScreen
 import com.skyview.weather.presentation.vault.VaultBrowserScreen
 import com.skyview.weather.presentation.vault.VaultItemDetailScreen
@@ -29,6 +31,8 @@ sealed class Screen(val route: String) {
         fun createRoute(itemId: String) = "vault_item/$itemId"
     }
     object Settings : Screen("settings")
+    object PrivacyPolicy : Screen("privacy_policy")
+    object Licenses : Screen("licenses")
 }
 
 /**
@@ -117,6 +121,30 @@ fun SkyViewNavigation(
         // Settings screen
         composable(Screen.Settings.route) {
             SettingsScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateToPrivacyPolicy = {
+                    navController.navigate(Screen.PrivacyPolicy.route)
+                },
+                onNavigateToLicenses = {
+                    navController.navigate(Screen.Licenses.route)
+                }
+            )
+        }
+
+        // Privacy Policy screen
+        composable(Screen.PrivacyPolicy.route) {
+            PrivacyPolicyScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        // Licenses screen
+        composable(Screen.Licenses.route) {
+            LicensesScreen(
                 onNavigateBack = {
                     navController.popBackStack()
                 }

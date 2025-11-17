@@ -23,6 +23,8 @@ import com.skyview.weather.data.local.*
 @Composable
 fun SettingsScreen(
     onNavigateBack: () -> Unit,
+    onNavigateToPrivacyPolicy: () -> Unit = {},
+    onNavigateToLicenses: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -138,14 +140,14 @@ fun SettingsScreen(
                 icon = Icons.Default.Security,
                 title = "Privacy Policy",
                 subtitle = "How we protect your data",
-                onClick = { /* TODO: Open privacy policy */ }
+                onClick = onNavigateToPrivacyPolicy
             )
 
             SettingsClickableItem(
                 icon = Icons.Default.Article,
                 title = "Open Source Licenses",
                 subtitle = "View third-party licenses",
-                onClick = { /* TODO: Open licenses */ }
+                onClick = onNavigateToLicenses
             )
         }
     }
