@@ -15,8 +15,9 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.google.accompanist.pager.*
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -32,7 +33,7 @@ import kotlinx.coroutines.launch
  * 3. Vault setup
  * 4. Tap sequence tutorial
  */
-@OptIn(ExperimentalPagerApi::class, ExperimentalPermissionsApi::class)
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun OnboardingScreen(
     onComplete: () -> Unit,
@@ -41,12 +42,11 @@ fun OnboardingScreen(
     viewModel: OnboardingViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val pagerState = rememberPagerState()
+    val pagerState = rememberPagerState(pageCount = { 4 })
     val coroutineScope = rememberCoroutineScope()
 
     Box(modifier = Modifier.fillMaxSize()) {
         HorizontalPager(
-            count = 4,
             state = pagerState,
             modifier = Modifier.fillMaxSize(),
             userScrollEnabled = false
@@ -86,14 +86,40 @@ fun OnboardingScreen(
         }
 
         // Page indicator
-        HorizontalPagerIndicator(
-            pagerState = pagerState,
+        PageIndicator(
+            pageCount = 4,
+            currentPage = pagerState.currentPage,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 32.dp),
-            activeColor = MaterialTheme.colorScheme.primary,
-            inactiveColor = MaterialTheme.colorScheme.surfaceVariant
+                .padding(bottom = 32.dp)
         )
+    }
+}
+
+/**
+ * Custom page indicator for HorizontalPager.
+ */
+@Composable
+private fun PageIndicator(
+    pageCount: Int,
+    currentPage: Int,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        repeat(pageCount) { page ->
+            val isActive = page == currentPage
+            Surface(
+                modifier = Modifier.size(if (isActive) 10.dp else 8.dp),
+                shape = CircleShape,
+                color = if (isActive)
+                    MaterialTheme.colorScheme.primary
+                else
+                    MaterialTheme.colorScheme.surfaceVariant
+            ) {}
+        }
     }
 }
 

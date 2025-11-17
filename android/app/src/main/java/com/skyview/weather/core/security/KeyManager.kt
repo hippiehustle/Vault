@@ -103,6 +103,26 @@ class KeyManager @Inject constructor(
     }
 
     /**
+     * Stores master password by initializing the vault.
+     * Wrapper method for backward compatibility.
+     *
+     * @param password Master password to store
+     */
+    fun storeMasterPassword(password: String) {
+        initializeVault(password)
+    }
+
+    /**
+     * Checks if master password is set.
+     * Wrapper method for backward compatibility.
+     *
+     * @return true if password has been set
+     */
+    fun isPasswordSet(): Boolean {
+        return isVaultInitialized()
+    }
+
+    /**
      * Gets the vault encryption key from Keystore.
      *
      * @return Vault encryption key
