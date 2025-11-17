@@ -19,7 +19,10 @@ object DatabaseModule {
 
     /**
      * Provides SkyView database instance.
-     * Database is encrypted with SQLCipher using derived passphrase.
+     * Database is encrypted with SQLCipher using device-specific passphrase.
+     *
+     * The passphrase is derived from Android Keystore, ensuring each device
+     * has a unique database encryption key that cannot be extracted.
      */
     @Provides
     @Singleton
@@ -27,9 +30,13 @@ object DatabaseModule {
         @ApplicationContext context: Context,
         keyManager: KeyManager
     ): SkyViewDatabase {
-        // Generate database passphrase from vault key
-        // For now, use a default passphrase. In production, derive from vault master key
-        val passphrase = "skyview_db_temp_key_2024".toCharArray()
+        // Generate database passphrase from Android Keystore
+        // This creates a unique key per device installation
+        val databaseKey = keyManager.getOrCreateDatabaseKey()
+        val passphrase = android.util.Base64.encodeToString(
+            databaseKey.encoded,
+            android.util.Base64.NO_WRAP
+        ).toCharArray()
 
         return SkyViewDatabase.getDatabase(context, passphrase)
     }

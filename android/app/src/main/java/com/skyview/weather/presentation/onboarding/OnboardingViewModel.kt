@@ -78,7 +78,8 @@ class OnboardingViewModel @Inject constructor(
         return password.length >= 8 &&
                password.any { it.isUpperCase() } &&
                password.any { it.isLowerCase() } &&
-               password.any { it.isDigit() }
+               password.any { it.isDigit() } &&
+               password.any { !it.isLetterOrDigit() } // Special characters/symbols
     }
 }
 
