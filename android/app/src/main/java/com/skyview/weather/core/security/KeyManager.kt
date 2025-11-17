@@ -32,6 +32,7 @@ class KeyManager @Inject constructor(
         private const val KEYSTORE_PROVIDER = "AndroidKeyStore"
         private const val MASTER_KEY_ALIAS = "skyview_master_key"
         private const val VAULT_KEY_ALIAS = "skyview_vault_key"
+        private const val DATABASE_KEY_ALIAS = "skyview_database_key"
         private const val ENCRYPTED_PREFS_NAME = "skyview_secure_prefs"
         private const val KEY_VAULT_PASSWORD_HASH = "vault_password_hash"
         private const val GCM_IV_LENGTH = 12
@@ -231,8 +232,40 @@ class KeyManager @Inject constructor(
         if (keyStore.containsAlias("biometric_vault_key")) {
             keyStore.deleteEntry("biometric_vault_key")
         }
+        if (keyStore.containsAlias(DATABASE_KEY_ALIAS)) {
+            keyStore.deleteEntry(DATABASE_KEY_ALIAS)
+        }
 
         encryptedPreferences.edit().clear().apply()
+    }
+
+    /**
+     * Gets or creates database encryption key from Android Keystore.
+     * This key is unique per device installation and stored securely in hardware.
+     *
+     * @return SecretKey for database encryption
+     */
+    fun getOrCreateDatabaseKey(): SecretKey {
+        return if (keyStore.containsAlias(DATABASE_KEY_ALIAS)) {
+            keyStore.getKey(DATABASE_KEY_ALIAS, null) as SecretKey
+        } else {
+            val keyGenerator = KeyGenerator.getInstance(
+                KeyProperties.KEY_ALGORITHM_AES,
+                KEYSTORE_PROVIDER
+            )
+            val keyGenSpec = KeyGenParameterSpec.Builder(
+                DATABASE_KEY_ALIAS,
+                KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
+            )
+                .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+                .setKeySize(256)
+                .setRandomizedEncryptionRequired(false) // For database, we need deterministic key
+                .build()
+
+            keyGenerator.init(keyGenSpec)
+            keyGenerator.generateKey()
+        }
     }
 
     /**
@@ -274,8 +307,9 @@ class KeyManager @Inject constructor(
         iv: ByteArray,
         cipher: Cipher
     ): ByteArray {
+        val key = getBiometricKey() ?: throw IllegalStateException("Biometric key not available")
         val spec = GCMParameterSpec(GCM_TAG_LENGTH, iv)
-        cipher.init(Cipher.DECRYPT_MODE, getBiometricKey(), spec)
+        cipher.init(Cipher.DECRYPT_MODE, key, spec)
         return cipher.doFinal(encrypted)
     }
 

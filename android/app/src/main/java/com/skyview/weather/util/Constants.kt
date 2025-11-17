@@ -13,6 +13,19 @@ object Constants {
     const val WEATHER_CACHE_DURATION_MS = 30 * 60 * 1000L // 30 minutes
     const val WIDGET_UPDATE_INTERVAL_MS = 30 * 60 * 1000L // 30 minutes
 
+    // Weather Data Configuration
+    const val HOURLY_FORECAST_COUNT = 24
+    const val DAILY_FORECAST_COUNT = 7
+
+    // Location Configuration
+    const val LOCATION_REQUEST_INTERVAL_MS = 10000L // 10 seconds
+    const val LOCATION_MAX_AGE_MS = 5 * 60 * 1000L // 5 minutes
+
+    // Worker Configuration
+    const val WEATHER_UPDATE_INTERVAL_MINUTES = 30
+    const val WEATHER_UPDATE_FLEX_INTERVAL_MINUTES = 5
+    const val WEATHER_WORKER_MAX_RETRY_ATTEMPTS = 3
+
     // Database Configuration
     const val DATABASE_NAME = "weather_cache.db" // Obfuscated name
     const val VAULT_DATABASE_NAME = "vault.db"
@@ -21,6 +34,7 @@ object Constants {
     const val ARGON2_MEMORY_KB = 65536 // 64 MB
     const val ARGON2_ITERATIONS = 2
     const val ARGON2_PARALLELISM = 4
+    const val PBKDF2_ITERATIONS_COUNT = 100000
     const val SALT_LENGTH_BYTES = 16
     const val AES_KEY_SIZE = 256
     const val GCM_IV_SIZE = 12
@@ -59,6 +73,9 @@ object Constants {
     const val PREF_BIOMETRIC_ENABLED = "biometric_enabled"
     const val PREF_AUTO_LOCK_TIMEOUT = "auto_lock_timeout"
     const val PREF_TAP_SEQUENCES = "tap_sequences"
+
+    // Preferences Default Values
+    const val PREF_DEFAULT_AUTO_LOCK_TIMEOUT = 5 // minutes
 
     // Deep Link Schemes
     const val DEEP_LINK_SCHEME = "skyview"

@@ -5,25 +5,23 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.skyview.weather.util.VaultItemType
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -101,11 +99,11 @@ fun VaultItemDetailScreen(
             }
         } else {
             when (item.type) {
-                "photo" -> PhotoDetailView(item, Modifier.padding(paddingValues))
-                "video" -> VideoDetailView(item, Modifier.padding(paddingValues))
-                "document" -> DocumentDetailView(item, Modifier.padding(paddingValues))
-                "note" -> NoteDetailView(item, Modifier.padding(paddingValues))
-                "password" -> PasswordDetailView(item, snackbarHostState, Modifier.padding(paddingValues))
+                VaultItemType.PHOTO -> PhotoDetailView(item, Modifier.padding(paddingValues))
+                VaultItemType.VIDEO -> VideoDetailView(item, Modifier.padding(paddingValues))
+                VaultItemType.DOCUMENT -> DocumentDetailView(item, Modifier.padding(paddingValues))
+                VaultItemType.NOTE -> NoteDetailView(item, Modifier.padding(paddingValues))
+                VaultItemType.PASSWORD -> PasswordDetailView(item, snackbarHostState, Modifier.padding(paddingValues))
                 else -> GenericDetailView(item, Modifier.padding(paddingValues))
             }
         }
@@ -530,7 +528,7 @@ private fun ItemMetadata(item: VaultItem) {
             MetadataRow(
                 icon = Icons.Default.Category,
                 label = "Type",
-                value = item.type.replaceFirstChar { it.uppercase() }
+                value = item.type.name.lowercase().replaceFirstChar { it.uppercase() }
             )
 
             MetadataRow(
@@ -542,7 +540,7 @@ private fun ItemMetadata(item: VaultItem) {
             MetadataRow(
                 icon = Icons.Default.Update,
                 label = "Modified",
-                value = dateFormatter.format(Date(item.modifiedAt))
+                value = dateFormatter.format(Date(item.updatedAt))
             )
 
             item.size?.let { size ->

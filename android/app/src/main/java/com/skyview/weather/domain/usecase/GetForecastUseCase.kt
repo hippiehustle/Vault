@@ -7,10 +7,20 @@ import javax.inject.Inject
 
 /**
  * Use case for getting weather forecast.
+ *
+ * Retrieves multi-day weather forecast for a specific location from the repository.
+ * Includes hourly and daily forecast data.
  */
 class GetForecastUseCase @Inject constructor(
     private val weatherRepository: WeatherRepository
 ) {
+    /**
+     * Gets weather forecast for specified coordinates.
+     *
+     * @param latitude Location latitude in degrees
+     * @param longitude Location longitude in degrees
+     * @return Flow emitting Result containing WeatherForecast with hourly and daily data
+     */
     operator fun invoke(
         latitude: Double,
         longitude: Double
